@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MORGAN AI V59 | REAL AI SIGNALS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;500;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --green: #00ffcc; --orange: #ff6b00; --red: #ff2d2d; --bg: #030305; --surface: #0a0a0f; --border: #1a1a2e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: #fff; font-family: 'Space Mono', monospace; font-size: 11px; min-height: 100vh; }
+        .container { max-width: 420px; margin: 0 auto; padding: 20px 16px; }
+        .logo-main { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 4px; line-height: 1; }
+        .logo-main span { color: var(--orange); }
+        .version-badge { background: #111120; border: 1px solid var(--green); color: var(--green); font-size: 8px; padding: 4px 8px; border-radius: 2px; }
+        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px; margin-bottom: 12px; }
+        select { background: #050508; border: 1px solid #222; padding: 10px; color: #fff; width: 100%; margin-bottom: 12px; font-family: inherit; }
+        .btn-scan { background: #000; border: 1px solid var(--green); color: var(--green); padding: 14px; width: 100%; font-family: 'Bebas Neue'; font-size: 18px; letter-spacing: 4px; cursor: pointer; }
+        .signal-main { font-family: 'Bebas Neue', sans-serif; font-size: 52px; letter-spacing: 6px; }
+        .signal-main.buy { color: #00ff88; }
+        .signal-main.sell { color: #ff2d2d; }
+        .levels-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
+        .level-box { background: #050508; border: 1px solid #1a1a2e; padding: 10px; border-radius: 3px; text-align: center; }
+        .error-box { border: 1px solid var(--red); padding: 15px; color: var(--red); text-align: center; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div class="logo-main">MORGAN <span>AI</span></div>
+        <div class="version-badge">V59 MASTER</div>
+    </div>
+
+    <div class="panel">
+        <div style="font-size:8px; color:#444; margin-bottom:5px;">SELECT ASSET</div>
+        <select id="asset">
+            <option value="XAUUSD">GOLD (XAU/USD)</option>
+            <option value="EURUSD">EUR/USD</option>
+            <option value="GBPUSD">GBP/USD</option>
+            <option value="USDJPY">USD/JPY</option>
+        </select>
+        <button id="scanBtn" onclick="runAnalysis()" class="btn-scan">⚡ ACTIVATE AI SCAN</button>
+    </div>
+
+    <div id="results"></div>
+</div>
+
+<script>
+    const FIREBASE_URL = "https://morgan-ai-v59-default-rtdb.firebaseio.com/signals.json";
+
+    async function runAnalysis() {
+        const asset = document.getElementById('asset').value;
+        const resultsDiv = document.getElementById('results');
+        
+        try {
+            const response = await fetch(FIREBASE_URL);
+            const allData = await response.json();
+            
+            // 🔥 FIXED: This line now checks for BOTH XAUUSD and XAU_USD formats
+            const signalData = allData[asset] || allData[asset.replace("USD", "_USD")] || allData[asset.replace("JPY", "_JPY")];
+
+            if (!signalData) throw new Error("Offline");
+
+            const sigClass = signalData.signal.toLowerCase();
+            resultsDiv.innerHTML = `
+                <div class="panel" style="border-left: 4px solid ${sigClass === 'buy' ? '#00ff88' : '#ff2d2d'}">
+                    <div style="font-size:10px; color:var(--green)">LIVE SIGNAL: ${asset}</div>
+                    <div class="signal-main ${sigClass}">${signalData.signal}</div>
+                    <div class="levels-grid">
+                        <div class="level-box"><div>ENTRY</div><div style="color:var(--green)">${signalData.entry}</div></div>
+                        <div class="level-box"><div>SL</div><div style="color:var(--red)">${signalData.sl}</div></div>
+                        <div class="level-box"><div>TP</div><div style="color:#00ff88">${signalData.tp}</div></div>
+                    </div>
+                </div>`;
+        } catch (err) {
+            resultsDiv.innerHTML = `<div class="error-box">⚠ ENGINE OFFLINE<br>Check Termux or OANDA API</div>`;
+        }
+    }
+</script>
+</body>
+</html>
