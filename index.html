@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MORGAN AI V60 MASTER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #050505; font-family: 'Rajdhani', sans-serif; color: #fff; }
+        .glass { background: rgba(20, 20, 20, 0.9); border: 1px solid #333; }
+        .neon-blue { box-shadow: 0 0 15px #00d2ff; border-color: #00d2ff; }
+        .neon-orange { box-shadow: 0 0 15px #ff8c00; border-color: #ff8c00; }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-md mx-auto">
+        <h1 class="text-3xl font-['Orbitron'] mb-6 text-center">MORGAN <span class="text-orange-500">AI V60</span></h1>
+
+        <div class="glass p-5 rounded-2xl space-y-4">
+            <div>
+                <label class="text-[10px] uppercase text-gray-500">Instrument & Timeframe</label>
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                    <select id="pair" class="bg-black border border-gray-700 p-2 rounded text-sm">
+                        <option value="XAUUSD">GOLD</option>
+                        <option value="EURUSD">EUR/USD</option>
+                    </select>
+                    <select id="tf" class="bg-black border border-gray-700 p-2 rounded text-sm">
+                        <option value="M1">1 MIN (SCALP)</option>
+                        <option value="M15">15 MIN (TRADING)</option>
+                        <option value="H1">1 HOUR (SWING)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-[10px] uppercase text-gray-500">Execution Mode</label>
+                <select id="mode" class="w-full bg-black border border-gray-700 p-3 rounded mt-1 font-bold text-cyan-400">
+                    <option value="AUTO">AUTO-TRADE (SCALP/SWING)</option>
+                    <option value="SIGNAL">SIGNAL ONLY (SCANNER)</option>
+                </select>
+            </div>
+
+            <button onclick="sendCmd('START')" class="w-full py-4 rounded-xl border-2 neon-blue font-bold uppercase">Activate Engine</button>
+            <button onclick="sendCmd('STOP')" class="w-full py-4 rounded-xl border-2 neon-orange font-bold uppercase">Stop & Close All</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendCmd(cmd) {
+            const data = {
+                command: cmd,
+                pair: document.getElementById('pair').value,
+                tf: document.getElementById('tf').value,
+                mode: document.getElementById('mode').value,
+                time: Date.now()
+            };
+            await fetch("https://morgan-ai-v59-default-rtdb.firebaseio.com/control.json", {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+            alert("Engine Updated: " + data.pair + " [" + data.tf + "]");
+        }
+    </script>
+</body>
+</html>
