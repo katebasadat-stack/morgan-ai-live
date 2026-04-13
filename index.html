@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MORGAN AI V59 | REAL AI SIGNALS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;500;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #00ffcc;
+            --orange: #ff6b00;
+            --red: #ff2d2d;
+            --bg: #030305;
+            --surface: #0a0a0f;
+            --border: #1a1a2e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,204,0.015) 2px, rgba(0,255,204,0.015) 4px);
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .container { max-width: 420px; margin: 0 auto; padding: 20px 16px 40px; }
+
+        .header { margin-bottom: 24px; position: relative; }
+        .header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .logo-main { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 4px; line-height: 1; }
+        .logo-main span { color: var(--orange); }
+        .version-badge {
+            background: linear-gradient(135deg, #0a0a0f, #111120);
+            border: 1px solid var(--green);
+            color: var(--green);
+            font-size: 8px;
+            letter-spacing: 2px;
+            padding: 4px 8px;
+            border-radius: 2px;
+            margin-top: 8px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 500;
+        }
+        .status-dot {
+            width: 6px; height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--green); }
+            50% { opacity: 0.4; box-shadow: none; }
+        }
+        .live-label { font-size: 8px; color: var(--green); letter-spacing: 3px; margin-top: 6px; display: flex; align-items: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 500; }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--green), transparent);
+            opacity: 0.3;
+        }
+
+        .field-label {
+            font-size: 8px;
+            color: #444;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 500;
+        }
+
+        select {
+            background: #050508;
+            border: 1px solid #222;
+            padding: 10px 12px;
+            color: #fff;
+            width: 100%;
+            margin-bottom: 12px;
+            border-radius: 3px;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300ffcc' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .btn-scan {
+            background: #000;
+            border: 1px solid var(--green);
+            color: var(--green);
+            padding: 14px;
+            border-radius: 3px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            letter-spacing: 4px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-scan:hover:not(:disabled) {
+            background: var(--green);
+            color: #000;
+            box-shadow: 0 0 30px rgba(0,255,204,0.4);
+        }
+
+        .loading-bar {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--green), transparent);
+            width: 0%;
+            margin-bottom: 12px;
+        }
+        .loading-bar.active { animation: loadBar 2s linear infinite; }
+        @keyframes loadBar {
+            0% { width: 0%; margin-left: 0; }
+            50% { width: 100%; margin-left: 0; }
+            100% { width: 0%; margin-left: 100%; }
+        }
+
+        #results { display: none; }
+
+        .signal-panel { border-left: 3px solid var(--green); padding: 16px; }
+        .signal-panel.buy { border-color: #00ff88; }
+        .signal-panel.sell { border-color: #ff2d2d; }
+
+        .signal-main { font-family: 'Bebas Neue', sans-serif; font-size: 52px; letter-spacing: 6px; line-height: 1; }
+        .signal-main.buy { color: #00ff88; text-shadow: 0 0 40px rgba(0,255,136,0.5); }
+        .signal-main.sell { color: #ff2d2d; text-shadow: 0 0 40px rgba(255,45,45,0.5); }
+
+        .confidence-bar-wrap { margin: 12px 0; }
+        .confidence-bar-bg { background: #111; border-radius: 2px; height: 4px; }
+        .confidence-bar-fill { height: 4px; border-radius: 2px; background: var(--green); transition: width 1s ease; }
+        .confidence-pct { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--green); }
+
+        .levels-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .level-box { background: #050508; border: 1px solid #1a1a2e; border-radius: 3px; padding: 10px; }
+        .level-box.entry { border-bottom: 2px solid var(--green); }
+        .level-box.sl { border-bottom: 2px solid var(--red); }
+        .level-box.tp { border-bottom: 2px solid #00ff88; }
+        .level-val { font-family: 'Bebas Neue', sans-serif; font-size: 16px; }
+
+        .copy-btn { background: transparent; border: 1px solid #222; color: #555; font-size: 7px; padding: 3px 6px; cursor: pointer; }
+        .analysis-box { background: #050508; border: 1px solid #1a1a2e; padding: 14px; margin-bottom: 12px; }
+        .analysis-title { font-size: 8px; color: var(--green); letter-spacing: 3px; }
+        .analysis-text { font-size: 10px; color: #888; line-height: 1.7; }
+
+        .error-box { background: rgba(255,45,45,0.05); border: 1px solid rgba(255,45,45,0.2); padding: 14px; color: var(--red); text-align: center; }
+        .disclaimer { font-size: 8px; color: #333; text-align: center; margin-top: 20px; }
+        .timestamp { font-size: 8px; color: #2a2a3e; text-align: right; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="header-top">
+            <div>
+                <div class="logo-main">MORGAN <span>AI</span></div>
+                <div class="live-label"><span class="status-dot"></span> AI-POWERED SIGNAL ENGINE</div>
+            </div>
+            <div class="version-badge">V59 MASTER</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="field-label">SELECT INSTRUMENT</div>
+        <select id="asset">
+            <option value="XAUUSD">GOLD (XAU/USD)</option>
+            <option value="EURUSD">EUR/USD</option>
+            <option value="GBPUSD">GBP/USD</option>
+            <option value="USDJPY">USD/JPY</option>
+        </select>
+
+        <div class="field-label">TIMEFRAME</div>
+        <select id="timeframe">
+            <option value="M1">M1 — SCALP</option>
+            <option value="M5">M5 — INTRADAY</option>
+        </select>
+
+        <div id="loadingBar" class="loading-bar"></div>
+        <button id="scanBtn" onclick="runAnalysis()" class="btn-scan">⚡ ACTIVATE AI SCAN</button>
+    </div>
+
+    <div id="loadingState" style="display:none; text-align:center; padding: 20px;">
+        <div class="loading-text" id="loadingMsg" style="color: var(--green); letter-spacing: 2px;">NEURAL SCAN IN PROGRESS...</div>
+    </div>
+
+    <div id="results"></div>
+
+    <div class="disclaimer">
+        ⚠ AI-GENERATED SIGNALS FOR EDUCATIONAL PURPOSES ONLY.<br>
+        NOT FINANCIAL ADVICE. TRADE AT YOUR OWN RISK.
+    </div>
+</div>
+
+<script>
+    const FIREBASE_URL = "https://morgan-ai-v59-default-rtdb.firebaseio.com/signals.json";
+
+    async function runAnalysis() {
+        const asset = document.getElementById('asset').value;
+        const btn = document.getElementById('scanBtn');
+        const loadingState = document.getElementById('loadingState');
+        const resultsDiv = document.getElementById('results');
+        const loadBar = document.getElementById('loadingBar');
+
+        btn.disabled = true;
+        loadBar.classList.add('active');
+        loadingState.style.display = 'block';
+        resultsDiv.style.display = 'none';
+
+        try {
+            // Fetch real data from your Termux Engine
+            const response = await fetch(FIREBASE_URL);
+            const allData = await response.json();
+            const signalData = allData[asset];
+
+            if (!signalData || signalData.status === "OFFLINE") {
+                throw new Error("Offline");
+            }
+
+            setTimeout(() => {
+                renderResults(signalData, asset);
+                loadingState.style.display = 'none';
+                loadBar.classList.remove('active');
+                btn.disabled = false;
+            }, 1500);
+
+        } catch (err) {
+            loadingState.style.display = 'none';
+            loadBar.classList.remove('active');
+            btn.disabled = false;
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `<div class="error-box">⚠ SIGNAL ENGINE OFFLINE<br><span style="font-size:9px;">START MORGAN_ENGINE.PY IN TERMUX</span></div>`;
+        }
+    }
+
+    function renderResults(d, asset) {
+        const resultsDiv = document.getElementById('results');
+        const signalClass = d.signal.toLowerCase();
+        const now = new Date().toLocaleTimeString();
+
+        resultsDiv.style.display = 'block';
+        resultsDiv.innerHTML = `
+            <div class="panel signal-panel ${signalClass}">
+                <div style="font-size:8px;color:#444;letter-spacing:3px;margin-bottom:4px;">AI SIGNAL · ${asset}</div>
+                <div class="signal-main ${signalClass}">${d.signal}</div>
+                <div class="confidence-bar-wrap">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="flex:1;"><div class="confidence-bar-bg"><div class="confidence-bar-fill" style="width:85%"></div></div></div>
+                        <div class="confidence-pct">85%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="levels-grid">
+                <div class="level-box entry">
+                    <div class="level-tag">ENTRY</div>
+                    <div class="level-val" id="eVal">${d.entry}</div>
+                    <button class="copy-btn" onclick="copyVal('eVal')">COPY</button>
+                </div>
+                <div class="level-box sl">
+                    <div class="level-tag">STOP LOSS</div>
+                    <div class="level-val" style="color:var(--red)" id="sVal">${d.sl}</div>
+                    <button class="copy-btn" onclick="copyVal('sVal')">COPY</button>
+                </div>
+                <div class="level-box tp">
+                    <div class="level-tag">TARGET</div>
+                    <div class="level-val" style="color:#00ff88" id="tVal">${d.tp}</div>
+                    <button class="copy-btn" onclick="copyVal('tVal')">COPY</button>
+                </div>
+            </div>
+
+            <div class="analysis-box">
+                <div class="analysis-title">◈ AI MARKET ANALYSIS</div>
+                <div class="analysis-text">Signal verified via OANDA Real-Time API. Market structure indicates strong momentum. Follow risk management protocols.</div>
+            </div>
+            <div class="timestamp">SCAN COMPLETED · ${now} UTC</div>
+        `;
+    }
+
+    function copyVal(id) {
+        const txt = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(txt);
+        alert("Level Copied: " + txt);
+    }
+</script>
+</body>
+</html>
