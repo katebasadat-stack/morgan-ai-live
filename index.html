@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MORGAN AI V60 OMNI-SNIPER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #000; font-family: 'Rajdhani', sans-serif; color: #fff; }
+        .glass { background: rgba(15, 15, 15, 0.98); border: 1px solid #222; }
+        .neon-text { color: #00f2ff; text-shadow: 0 0 15px #00f2ff; }
+        .input-box { background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; }
+        .stage-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; background: #111; color: #555; border: 1px solid #222; }
+        .stage-active { background: #0891b2; color: #fff; border-color: #00f2ff; box-shadow: 0 0 10px #00f2ff; }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-md mx-auto">
+        <div class="glass p-6 rounded-3xl mb-4 border-b-2 border-cyan-500">
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] text-cyan-500 font-bold tracking-widest uppercase">Live Account Monitor</span>
+                <span class="text-[10px] text-green-500 font-bold uppercase animate-pulse">● Engine Online</span>
+            </div>
+            <div id="balance" class="text-4xl font-['Orbitron'] neon-text mb-2">$99,994.63</div>
+            
+            <div class="flex justify-between items-end border-t border-gray-900 pt-4">
+                <div>
+                    <p class="text-[9px] text-gray-500 uppercase font-bold">Unrealized P/L</p>
+                    <p id="profit" class="text-lg font-['Orbitron'] text-white">$0.0000</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[9px] text-gray-500 uppercase font-bold">Scanning Waves</p>
+                    <div class="flex gap-1 h-3 items-center">
+                        <div class="w-1 bg-cyan-500 h-full animate-bounce"></div>
+                        <div class="w-1 bg-cyan-400 h-1/2 animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-1 bg-cyan-600 h-2/3 animate-bounce" style="animation-delay: 0.2s"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-between mb-4 px-2">
+            <div id="st-1" class="stage-badge stage-active">1P</div>
+            <div id="st-2" class="stage-badge">2P</div>
+            <div id="st-3" class="stage-badge">3P</div>
+            <div id="st-4" class="stage-badge">4P</div>
+            <div id="st-5" class="stage-badge">5P</div>
+        </div>
+
+        <div class="glass p-6 rounded-3xl mb-4 space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] text-gray-400 uppercase font-bold mb-2 block">Trading Strategy</label>
+                    <select id="mode" class="input-box w-full text-cyan-400">
+                        <option value="HYPER-SCALP">⚡ HYPER-SCALP</option>
+                        <option value="DAYTRADING">☀️ DAY TRADING</option>
+                        <option value="SWINGING">🌊 SWING TRADING</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-400 uppercase font-bold mb-2 block">Lot Size</label>
+                    <input id="lot" type="number" step="0.01" value="0.01" class="input-box w-full text-center">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] text-gray-400 uppercase font-bold mb-2 block">Instrument Lock</label>
+                    <select id="target" class="input-box w-full">
+                        <option value="XAUUSD">GOLD (XAUUSD)</option>
+                        <option value="EURUSD">EUR/USD</option>
+                        <option value="GBPUSD">GBP/USD</option>
+                        <option value="USDJPY">USD/JPY</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-400 uppercase font-bold mb-2 block">Timeframe Sync</label>
+                    <select id="tf" class="input-box w-full">
+                        <option value="M1">1 MIN (SCALP)</option>
+                        <option value="M5">5 MIN (FAST)</option>
+                        <option value="M15">15 MIN (TREND)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-[10px] text-gray-400 uppercase font-bold mb-2 block">Execution Logic</label>
+                <select id="exec" class="input-box w-full text-cyan-500">
+                    <option value="AUTO-EXECUTE">AUTO-EXECUTE (LIVE)</option>
+                    <option value="SIGNAL-ONLY">SIGNAL ONLY (SCANNER)</option>
+                </select>
+            </div>
+
+            <button onclick="sendCmd('START')" class="w-full py-5 bg-cyan-600 hover:bg-cyan-500 rounded-2xl font-black uppercase text-xs tracking-widest transition shadow-lg shadow-cyan-900/30">Activate Sniper Engine</button>
+            <button onclick="sendCmd('STOP')" class="w-full py-3 bg-red-950 hover:bg-red-900 border border-red-800 text-red-100 rounded-2xl font-bold uppercase text-[10px]">🛑 Stop & Close All Positions</button>
+        </div>
+
+        <div class="text-[10px] text-gray-600 uppercase font-bold mb-2 ml-1 tracking-widest">Global Market Intelligence (11 Pairs)</div>
+        <div id="scanner" class="glass rounded-3xl divide-y divide-gray-900 overflow-hidden">
+            </div>
+    </div>
+
+    <script>
+        const DB = "https://morgan-ai-v59-default-rtdb.firebaseio.com";
+        const PAIRS = ["XAUUSD","EURUSD","GBPUSD","USDJPY","AUDUSD","USDCHF","USDCAD","EURJPY","GBPJPY","AUDJPY","NZDUSD"];
+        let currentStage = 1;
+
+        async function sendCmd(cmd) {
+            const data = {
+                command: cmd,
+                mode: document.getElementById('mode').value,
+                lot: document.getElementById('lot').value,
+                target: document.getElementById('target').value,
+                tf: document.getElementById('tf').value,
+                exec: document.getElementById('exec').value,
+                stage: currentStage,
+                timestamp: Date.now()
+            };
+            await fetch(`${DB}/control.json`, { method: 'PUT', body: JSON.stringify(data) });
+        }
+
+        setInterval(async () => {
+            try {
+                const res = await fetch(`${DB}/signals.json`);
+                const data = await res.json();
+                if(!data) return;
+                
+                // Live Sync
+                if(data.account) {
+                    document.getElementById('balance').innerText = `$${parseFloat(data.account.balance).toLocaleString()}`;
+                    const pl = parseFloat(data.account.pl);
+                    document.getElementById('profit').innerText = `$${pl.toFixed(4)}`;
+                    document.getElementById('profit').className = pl >= 0 ? "text-lg font-['Orbitron'] text-green-400" : "text-lg font-['Orbitron'] text-red-500";
+                    
+                    // High-Speed Scaling Logic
+                    checkScaling(pl);
+                }
+
+                // Global Feed
+                let h = "";
+                PAIRS.forEach(p => {
+                    const s = data[p] || {type: "SCANNING", price: "0.00"};
+                    const color = s.type === 'BUY' ? "text-green-400" : (s.type === 'SELL' ? "text-red-500" : "text-gray-600");
+                    h += `<div class="p-4 flex justify-between items-center text-[12px] font-bold">
+                        <span class="text-gray-300">${p}</span>
+                        <span class="text-gray-600 font-mono">${s.price}</span>
+                        <span class="uppercase ${color}">${s.type}</span>
+                    </div>`;
+                });
+                document.getElementById('scanner').innerHTML = h;
+            } catch (e) { }
+        }, 800); // Super-Fast Polling (800ms)
+
+        function checkScaling(pl) {
+            const targets = [0.5, 0.8, 1.5, 2.5, 5.0];
+            for(let i=0; i<5; i++) {
+                const badge = document.getElementById(`st-${i+1}`);
+                if(pl >= targets[i] && currentStage === (i+1)) {
+                    currentStage++;
+                    sendCmd('CLOSE_AND_SCALE');
+                }
+                badge.className = `stage-badge ${(i+1) === currentStage ? 'stage-active' : ''}`;
+            }
+        }
+    </script>
+</body>
+</html>
