@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MORGAN AI V60 ULTRA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { background:#000; font-family:'Rajdhani',sans-serif; color:#fff; }
+        .glass { background:rgba(10,10,10,0.98); border:1px solid #222; border-radius: 24px; }
+        .neon-text { color:#00f2ff; text-shadow:0 0 15px #00f2ff; }
+        .input-box { background:#000; border:1px solid #333; padding:12px; border-radius:12px; font-size:14px; color:#fff; width:100%; outline:none; }
+        .mode-btn { border: 1px solid #333; padding: 8px; border-radius: 10px; font-size: 10px; cursor: pointer; transition: 0.3s; text-align: center; background: transparent; }
+        .mode-active { background: #0891b2; border-color: #00f2ff; color: #fff; box-shadow: 0 0 10px #0891b2; }
+        .btn-stop { background: rgba(220, 38, 38, 0.1); border: 1px solid #991b1b; color: #ef4444; }
+        .btn-active-state { background: #065f46 !important; border-color: #10b981 !important; box-shadow: 0 0 15px #065f46 !important; }
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .live-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+        @keyframes scan-line { 0%{transform:translateY(-100%)} 100%{transform:translateY(400%)} }
+        .scan-active::after {
+            content:''; position:absolute; left:0; right:0; height:2px;
+            background:linear-gradient(90deg,transparent,#00f2ff,transparent);
+            animation: scan-line 2s linear infinite;
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-md mx-auto space-y-4">
+
+        <div id="header-card" class="glass p-6 border-b-2 border-cyan-500 shadow-lg shadow-cyan-900/20 relative overflow-hidden">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-cyan-500 text-[10px] font-bold tracking-widest uppercase">Morgan AI Brain v6.0</span>
+                <div class="flex items-center gap-2">
+                    <span id="conn-dot" class="live-dot text-yellow-400 text-[8px]">●</span>
+                    <span id="conn-label" class="text-[9px] font-bold text-yellow-400">CONNECTING...</span>
+                </div>
+            </div>
+            <div id="balance" class="text-5xl font-['Orbitron'] neon-text mb-1">$0.00</div>
+            <div class="grid grid-cols-2 gap-3 mt-4">
+                <div class="bg-zinc-900/50 p-3 rounded-xl border border-zinc-800">
+                    <p class="text-[9px] text-gray-500 uppercase font-bold">Live Profit/Loss</p>
+                    <span id="live-pl" class="text-lg font-bold text-white">$0.00</span>
+                </div>
+                <div class="bg-zinc-900/50 p-3 rounded-xl border border-zinc-800">
+                    <p class="text-[9px] text-gray-500 uppercase font-bold">AI Selection</p>
+                    <span id="ai-pair-display" class="text-lg font-bold text-cyan-400">WAITING</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass p-6 space-y-4">
+            <label class="text-[10px] text-gray-500 font-bold uppercase block -mb-2">Trading Strategy</label>
+            <div class="grid grid-cols-3 gap-2">
+                <div onclick="setMode('SCALPING')" id="mode-scalp" class="mode-btn mode-active">SCALP</div>
+                <div onclick="setMode('SWINGING')" id="mode-swing" class="mode-btn">SWING</div>
+                <div onclick="setMode('FLIPPING')" id="mode-flip" class="mode-btn text-red-400">FLIP</div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] text-gray-500 font-bold uppercase">Asset Selection</label>
+                <select id="pair-select" class="input-box" onchange="toggleCustom()">
+                    <option value="AUTO">🤖 SMART AI SCAN (Search All)</option>
+                    <optgroup label="Standard Volatility">
+                        <option value="R_10">Volatility 10 Index</option>
+                        <option value="R_25">Volatility 25 Index</option>
+                        <option value="R_50">Volatility 50 Index</option>
+                        <option value="R_75">Volatility 75 Index</option>
+                        <option value="R_100">Volatility 100 Index</option>
+                    </optgroup>
+                    <optgroup label="High-Speed (1s) Indices">
+                        <option value="1HZ10V">Volatility 10 (1s)</option>
+                        <option value="1HZ25V">Volatility 25 (1s)</option>
+                        <option value="1HZ50V">Volatility 50 (1s)</option>
+                        <option value="1HZ100V">Volatility 100 (1s)</option>
+                    </optgroup>
+                    <optgroup label="Forex Multipliers">
+                        <option value="frxEURUSD">EUR/USD</option>
+                        <option value="frxGBPUSD">GBP/USD</option>
+                    </optgroup>
+                    <option value="CUSTOM">-- Add Custom Pair Code --</option>
+                </select>
+                <input id="custom-pair" type="text" placeholder="Enter Deriv Code (e.g. R_75)" class="input-box hidden">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase font-bold">TP Amount ($)</label>
+                    <input id="tp-val" type="number" step="0.01" value="0.25" class="input-box">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase font-bold">Lot/Stake</label>
+                    <input id="lot-val" type="number" step="0.1" value="1.00" class="input-box">
+                </div>
+            </div>
+
+            <button id="activate-btn" onclick="activateSniper()"
+                class="w-full py-4 bg-cyan-600 rounded-2xl font-black text-xs tracking-widest shadow-lg shadow-cyan-900/40 hover:bg-cyan-500 transition-all">
+                ACTIVATE AI SNIPER
+            </button>
+
+            <button onclick="emergencyStop()"
+                class="w-full py-3 btn-stop rounded-2xl text-[10px] font-bold uppercase tracking-widest">
+                Stop All Trades & Clear
+            </button>
+        </div>
+
+        <div class="glass p-4 h-40 overflow-hidden relative">
+            <div class="flex justify-between text-[10px] text-zinc-600 mb-2 border-b border-zinc-900 pb-1">
+                <span>AI SCANNER FEED</span>
+                <span>SYSTEM V6.0.5</span>
+            </div>
+            <div id="scanner-feed" class="text-[10px] font-mono text-cyan-800 space-y-1 overflow-y-auto h-28">
+                <div>> Initializing AI Scanning Layers...</div>
+                <div>> Ready for sniper entry.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const DB = "https://morgan-ai-v59-default-rtdb.firebaseio.com";
+        let currentMode = "SCALPING";
+        let isPolling = false;
+        let lastAiMsg = "";
+        let feedLineCount = 2;
+        const MAX_FEED_LINES = 50;
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('mode-active'));
+            const idMap = { "SCALPING": "mode-scalp", "SWINGING": "mode-swing", "FLIPPING": "mode-flip" };
+            document.getElementById(idMap[mode]).classList.add('mode-active');
+            logScanner(`Strategy changed: ${mode}`);
+        }
+
+        function toggleCustom() {
+            const select = document.getElementById('pair-select');
+            const custom = document.getElementById('custom-pair');
+            custom.classList.toggle('hidden', select.value !== 'CUSTOM');
+        }
+
+        function logScanner(msg, colorClass = "text-cyan-700") {
+            const feed = document.getElementById('scanner-feed');
+            const div = document.createElement('div');
+            div.className = colorClass;
+            div.textContent = `> ${msg}`;
+            feed.appendChild(div);
+            feedLineCount++;
+            if (feedLineCount > MAX_FEED_LINES) {
+                feed.removeChild(feed.firstChild);
+                feedLineCount--;
+            }
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        async function activateSniper() {
+            const pairVal = document.getElementById('pair-select').value;
+            const pair = pairVal === 'CUSTOM'
+                ? document.getElementById('custom-pair').value.trim()
+                : pairVal;
+
+            if (!pair) { logScanner("⚠️ Select or enter a pair first.", "text-yellow-500"); return; }
+
+            const payload = {
+                command: "START",
+                pair: pair,
+                mode: currentMode,
+                tp: parseFloat(document.getElementById('tp-val').value) || 0.25,
+                lot: parseFloat(document.getElementById('lot-val').value) || 1.00,
+                time: Date.now()
+            };
+
+            try {
+                await fetch(`${DB}/control.json`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const btn = document.getElementById('activate-btn');
+                btn.textContent = "✅ AI SNIPER ACTIVE";
+                btn.classList.add('btn-active-state');
+                document.getElementById('header-card').classList.add('scan-active');
+                logScanner(`🎯 Sniper activated | Pair: ${pair} | Lot: $${payload.lot}`, "text-green-500");
+            } catch (e) {
+                logScanner("❌ Failed to send command to Firebase.", "text-red-500");
+            }
+        }
+
+        async function emergencyStop() {
+            try {
+                await fetch(`${DB}/control.json`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ command: "STOP", time: Date.now() })
+                });
+                const btn = document.getElementById('activate-btn');
+                btn.textContent = "ACTIVATE AI SNIPER";
+                btn.classList.remove('btn-active-state');
+                document.getElementById('header-card').classList.remove('scan-active');
+                document.getElementById('ai-pair-display').textContent = "WAITING";
+                logScanner("🛑 EMERGENCY STOP SENT", "text-red-500");
+            } catch (e) {
+                logScanner("❌ Stop command failed. Check connection.", "text-red-500");
+            }
+        }
+
+        setInterval(async () => {
+            if (isPolling) return;
+            isPolling = true;
+            try {
+                const res = await fetch(`${DB}/signals.json`).then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                });
+
+                if (res) {
+                    if (res.account) {
+                        const bal = parseFloat(res.account.balance || 0);
+                        document.getElementById('balance').textContent = `$${bal.toFixed(2)}`;
+                        const pl = parseFloat(res.account.pl || 0);
+                        const plEl = document.getElementById('live-pl');
+                        plEl.textContent = `$${pl.toFixed(2)}`;
+                        plEl.className = `text-lg font-bold ${pl >= 0 ? 'text-green-500' : 'text-red-500'}`;
+                    }
+
+                    if (res.symbol) {
+                        document.getElementById('ai-pair-display').textContent = res.symbol;
+                    }
+
+                    if (res.ai_msg && res.ai_msg !== lastAiMsg) {
+                        logScanner(res.ai_msg, res.ai_msg.includes("❌") ? "text-red-500" : "text-cyan-600");
+                        lastAiMsg = res.ai_msg;
+                    }
+
+                    const statusLabel = document.getElementById('conn-label');
+                    const statusDot = document.getElementById('conn-dot');
+                    if (res.status === "TRADING") {
+                        statusLabel.textContent = "TRADING";
+                        statusLabel.className = "text-[9px] font-bold text-green-400";
+                        statusDot.className = "live-dot text-green-400 text-[8px]";
+                    } else if (res.status === "ACTIVE") {
+                        statusLabel.textContent = "BOT ACTIVE";
+                        statusLabel.className = "text-[9px] font-bold text-cyan-400";
+                        statusDot.className = "live-dot text-cyan-400 text-[8px]";
+                    } else {
+                        statusLabel.textContent = "WAITING";
+                        statusLabel.className = "text-[9px] font-bold text-yellow-400";
+                        statusDot.className = "live-dot text-yellow-400 text-[8px]";
+                    }
+                }
+            } catch (e) {
+                const statusLabel = document.getElementById('conn-label');
+                const statusDot = document.getElementById('conn-dot');
+                statusLabel.textContent = "DISCONNECTED";
+                statusLabel.className = "text-[9px] font-bold text-red-500";
+                statusDot.className = "live-dot text-red-500 text-[8px]";
+                logScanner(`⚠️ Firebase error: ${e.message}`, "text-red-800");
+            } finally {
+                isPolling = false;
+            }
+        }, 2500);
+    </script>
+</body>
+</html>
