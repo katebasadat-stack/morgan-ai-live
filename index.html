@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MORGAN AI V60 ULTRA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { background:#000; font-family:'Rajdhani',sans-serif; color:#fff; }
+        .glass { background:rgba(10,10,10,0.98); border:1px solid #222; border-radius: 24px; }
+        .neon-text { color:#00f2ff; text-shadow:0 0 15px #00f2ff; }
+        .input-box { background:#000; border:1px solid #333; padding:12px; border-radius:12px; font-size:14px; color:#fff; width:100%; outline:none; }
+        .mode-btn { border: 1px solid #333; padding: 8px; border-radius: 10px; font-size: 10px; cursor: pointer; transition: 0.3s; text-align: center; }
+        .mode-active { background: #0891b2; border-color: #00f2ff; color: #fff; box-shadow: 0 0 10px #0891b2; }
+        .btn-stop { background: rgba(220, 38, 38, 0.1); border: 1px solid #991b1b; color: #ef4444; }
+        .status-online { color: #10b981; }
+        .status-offline { color: #ef4444; }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-md mx-auto space-y-4">
+        
+        <div class="glass p-6 border-b-2 border-cyan-500 shadow-lg shadow-cyan-900/20">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-cyan-500 text-[10px] font-bold tracking-widest uppercase">Morgan AI Brain v6.0</span>
+                <div class="text-right">
+                    <span id="engine-status" class="text-red-500 text-[10px] font-bold">● ENGINE OFFLINE</span>
+                </div>
+            </div>
+            <div id="balance" class="text-5xl font-['Orbitron'] neon-text mb-1">$0.00</div>
+            
+            <div class="grid grid-cols-2 gap-3 mt-4">
+                <div class="bg-zinc-900/50 p-3 rounded-xl border border-zinc-800">
+                    <p class="text-[9px] text-gray-500 uppercase font-bold">Live Profit/Loss</p>
+                    <span id="live-pl" class="text-lg font-bold text-white">$0.00</span>
+                </div>
+                <div class="bg-zinc-900/50 p-3 rounded-xl border border-zinc-800">
+                    <p class="text-[9px] text-gray-500 uppercase font-bold">AI Selection</p>
+                    <span id="ai-pair-display" class="text-lg font-bold text-cyan-400">WAITING</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass p-6 space-y-4">
+            <label class="text-[10px] text-gray-500 font-bold uppercase block -mb-2">Trading Strategy</label>
+            <div class="grid grid-cols-3 gap-2">
+                <div onclick="setMode('SCALPING')" id="mode-scalp" class="mode-btn mode-active">SCALP</div>
+                <div onclick="setMode('SWINGING')" id="mode-swing" class="mode-btn">SWING</div>
+                <div onclick="setMode('FLIPPING')" id="mode-flip" class="mode-btn text-red-400">FLIP</div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] text-gray-500 font-bold uppercase">Asset Selection</label>
+                <select id="pair-select" class="input-box" onchange="toggleCustom()">
+                    <option value="AUTO">🤖 SMART AI SCAN (All Volatility Pairs)</option>
+                    <optgroup label="Standard Volatility">
+                        <option value="R_10">Volatility 10 Index</option>
+                        <option value="R_25">Volatility 25 Index</option>
+                        <option value="R_50">Volatility 50 Index</option>
+                        <option value="R_75">Volatility 75 Index</option>
+                        <option value="R_100">Volatility 100 Index</option>
+                    </optgroup>
+                    <optgroup label="High-Speed (1s) Indices">
+                        <option value="1HZ10V">Volatility 10 (1s)</option>
+                        <option value="1HZ25V">Volatility 25 (1s)</option>
+                        <option value="1HZ50V">Volatility 50 (1s)</option>
+                        <option value="1HZ100V">Volatility 100 (1s)</option>
+                    </optgroup>
+                    <optgroup label="Forex Multipliers">
+                        <option value="frxEURUSD">EUR/USD</option>
+                        <option value="frxGBPUSD">GBP/USD</option>
+                    </optgroup>
+                    <option value="CUSTOM">-- Add Custom Pair Code --</option>
+                </select>
+                <input id="custom-pair" type="text" placeholder="Enter Deriv Code (e.g. R_75)" class="input-box hidden">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase font-bold">TP Amount ($)</label>
+                    <input id="tp-val" type="number" step="0.01" value="0.25" class="input-box">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-500 uppercase font-bold">Lot/Stake</label>
+                    <input id="lot-val" type="number" step="0.1" value="1.00" class="input-box">
+                </div>
+            </div>
+
+            <button onclick="activateSniper()" class="w-full py-4 bg-cyan-600 rounded-2xl font-black text-xs tracking-widest shadow-lg shadow-cyan-900/40 hover:bg-cyan-500 transition-all">
+                ACTIVATE AI SNIPER
+            </button>
+
+            <button onclick="emergencyStop()" class="w-full py-3 btn-stop rounded-2xl text-[10px] font-bold uppercase tracking-widest">
+                Stop All Trades & Clear
+            </button>
+        </div>
+
+        <div class="glass p-4 h-40 overflow-hidden relative">
+            <div class="flex justify-between text-[10px] text-zinc-600 mb-2 border-b border-zinc-900 pb-1">
+                <span>AI SCANNER FEED</span>
+                <span>SYSTEM V6.0.5</span>
+            </div>
+            <div id="scanner-feed" class="text-[10px] font-mono space-y-1 overflow-y-auto h-28">
+                > Initializing AI Scanning Layers...<br>
+                > Ready for sniper entry.<br>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DB = "https://morgan-ai-v59-default-rtdb.firebaseio.com";
+        let currentMode = "SCALPING";
+        let lastEngineHeartbeat = Date.now();
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('mode-active'));
+            const idMap = {"SCALPING":"mode-scalp", "SWINGING":"mode-swing", "FLIPPING":"mode-flip"};
+            document.getElementById(idMap[mode]).classList.add('mode-active');
+            logScanner(`Strategy: ${mode}`);
+        }
+
+        function toggleCustom() {
+            const select = document.getElementById('pair-select');
+            const custom = document.getElementById('custom-pair');
+            custom.classList.toggle('hidden', select.value !== 'CUSTOM');
+        }
+
+        async function activateSniper() {
+            const pairVal = document.getElementById('pair-select').value;
+            let pair = pairVal === 'CUSTOM' ? document.getElementById('custom-pair').value : pairVal;
+            
+            const payload = {
+                command: "START",
+                pair: pair,
+                mode: currentMode,
+                tp: document.getElementById('tp-val').value,
+                lot: document.getElementById('lot-val').value,
+                time: Date.now()
+            };
+
+            try {
+                await fetch(`${DB}/control.json`, { method: "PUT", body: JSON.stringify(payload) });
+                logScanner(`🚀 AI Sniper Activated on ${pair === "AUTO" ? "SMART SCAN (All Volatility Pairs)" : pair}`, "text-green-500");
+            } catch(e) {
+                logScanner(`❌ Activation failed: ${e.message}`, "text-red-500");
+            }
+        }
+
+        async function emergencyStop() {
+            try {
+                await fetch(`${DB}/control.json`, { method: "PUT", body: JSON.stringify({command: "STOP", time: Date.now()}) });
+                logScanner(`🛑 EMERGENCY STOP - All trading halted`, "text-red-500");
+                document.getElementById('ai-pair-display').innerText = "STOPPED";
+            } catch(e) {
+                logScanner(`❌ Stop failed: ${e.message}`, "text-red-500");
+            }
+        }
+
+        function logScanner(msg, colorClass = "text-cyan-700") {
+            const feed = document.getElementById('scanner-feed');
+            const time = new Date().toLocaleTimeString();
+            feed.innerHTML += `<div class="${colorClass}">[${time}] ${msg}</div>`;
+            if (feed.children.length > 50) {
+                while (feed.children.length > 40) {
+                    feed.removeChild(feed.firstChild);
+                }
+            }
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        // Monitor engine status and data
+        setInterval(async () => {
+            try {
+                const res = await fetch(`${DB}/signals.json?t=${Date.now()}`).then(r => r.json());
+                
+                if(res && res.timestamp) {
+                    lastEngineHeartbeat = res.timestamp * 1000;
+                }
+                
+                // Check if engine is alive (heartbeat within last 30 seconds)
+                const isEngineAlive = (Date.now() - lastEngineHeartbeat) < 30000;
+                const statusElement = document.getElementById('engine-status');
+                
+                if(isEngineAlive) {
+                    statusElement.innerHTML = '● ENGINE ONLINE';
+                    statusElement.className = 'text-green-500 text-[10px] font-bold';
+                } else {
+                    statusElement.innerHTML = '● ENGINE OFFLINE';
+                    statusElement.className = 'text-red-500 text-[10px] font-bold';
+                }
+                
+                if(res) {
+                    if(res.account) {
+                        if(res.account.balance) {
+                            document.getElementById('balance').innerText = `$${res.account.balance}`;
+                        }
+                        if(res.account.pl !== undefined) {
+                            const pl = parseFloat(res.account.pl);
+                            const plDisplay = document.getElementById('live-pl');
+                            plDisplay.innerText = `$${pl.toFixed(2)}`;
+                            plDisplay.className = pl >= 0 ? "text-green-500 font-bold" : "text-red-500 font-bold";
+                        }
+                    }
+                    if(res.ai_msg) {
+                        const msg = res.ai_msg;
+                        // Extract pair name
+                        const pairMatch = msg.match(/(R_\d+|1HZ\d+V|frx[A-Z]+)/);
+                        if(pairMatch) {
+                            document.getElementById('ai-pair-display').innerText = pairMatch[0];
+                        }
+                    }
+                }
+            } catch(e) {
+                // Silent fail
+            }
+        }, 1000);
+        
+        logScanner("🔄 System Ready - Waiting for engine connection...", "text-yellow-500");
+        logScanner("💡 Make sure Python engine is running in Termux", "text-yellow-500");
+    </script>
+</body>
+</html>
